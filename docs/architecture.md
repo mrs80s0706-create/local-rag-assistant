@@ -101,21 +101,21 @@ src/localrag/
 
 ```mermaid
 graph LR
-    subgraph local["🔒 Your machine — air-gapped by default"]
+    subgraph zone_local["🔒 Your machine — air-gapped by default"]
         docs["Documents"] --> ingest["Ingestion"]
         ingest --> chromadb["ChromaDB<br/>local disk"]
         chromadb --> ollama["Ollama<br/>localhost:11434"]
         ollama --> answer["Answer"]
     end
 
-    subgraph cloud["☁️ Internet — opt-in only"]
+    subgraph zone_cloud["☁️ Internet — opt-in only"]
         anthropic["Anthropic API<br/>USE_CLOUD_LLM=true"]
     end
 
     ollama -.->|opt-in only| anthropic
 
-    style local fill:#0d1f0d,stroke:#2a6a2a,color:#aaffaa
-    style cloud fill:#1f0d0d,stroke:#6a2a2a,color:#ffaaaa
+    style zone_local fill:#0d1f0d,stroke:#2a6a2a,color:#aaffaa
+    style zone_cloud fill:#1f0d0d,stroke:#6a2a2a,color:#ffaaaa
 ```
 
 **When `USE_CLOUD_LLM=false` (default):** the dashed arrow does not exist.  
