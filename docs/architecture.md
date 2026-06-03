@@ -48,16 +48,16 @@ sequenceDiagram
     actor User
     participant UI as Streamlit UI
     participant Mgr as DocumentManager
-    participant VS as VectorStore (ChromaDB)
-    participant Emb as OllamaEmbeddings<br/>(local)
-    participant LLM as Ollama LLM<br/>(local)
+    participant VS as VectorStore
+    participant Emb as OllamaEmbeddings
+    participant LLM as Ollama LLM
 
     User->>UI: Upload document
     UI->>Mgr: load_file(path)
     Mgr->>Mgr: Extract text (PyMuPDF / Tesseract / Whisper)
     Mgr->>VS: add_documents(chunks)
     VS->>Emb: embed_documents(texts)
-    Note over Emb: Runs on localhost:11434<br/>No external call
+    Note over Emb: localhost:11434 — no external call
     Emb-->>VS: vectors
     VS-->>UI: Indexed
 
@@ -67,7 +67,7 @@ sequenceDiagram
     Emb-->>VS: query vector
     VS-->>UI: top-k chunks
     UI->>LLM: prompt (context + question)
-    Note over LLM: Runs on localhost:11434<br/>No external call
+    Note over LLM: localhost:11434 — no external call
     LLM-->>UI: streamed answer
     UI-->>User: Answer + citations
 ```
@@ -101,18 +101,18 @@ src/localrag/
 
 ```mermaid
 graph LR
-    subgraph local["🔒 Your machine (air-gapped by default)"]
+    subgraph local["🔒 Your machine — air-gapped by default"]
         docs["Documents"] --> ingest["Ingestion"]
-        ingest --> chromadb["ChromaDB\n(local disk)"]
-        chromadb --> ollama["Ollama\nlocalhost:11434"]
+        ingest --> chromadb["ChromaDB<br/>local disk"]
+        chromadb --> ollama["Ollama<br/>localhost:11434"]
         ollama --> answer["Answer"]
     end
 
-    subgraph cloud["☁️ Internet (opt-in only)"]
-        anthropic["Anthropic API\n(USE_CLOUD_LLM=true)"]
+    subgraph cloud["☁️ Internet — opt-in only"]
+        anthropic["Anthropic API<br/>USE_CLOUD_LLM=true"]
     end
 
-    ollama -.->|"USE_CLOUD_LLM=true\n(query text only)"| anthropic
+    ollama -.->|opt-in only| anthropic
 
     style local fill:#0d1f0d,stroke:#2a6a2a,color:#aaffaa
     style cloud fill:#1f0d0d,stroke:#6a2a2a,color:#ffaaaa
