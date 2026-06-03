@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "localrag"
+version = "0.1.0"
+description = "Privacy-first local document knowledge assistant — LLM, embeddings, and vector DB all run on-device."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+keywords = [
+    "rag", "llm", "ollama", "chromadb", "local-ai",
+    "privacy", "document-qa", "streamlit", "offline-ai"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    # Core RAG
+    "streamlit>=1.30.0",
+    "langchain>=0.3.0",
+    "langchain-community>=0.3.0",
+    "langchain-ollama>=0.2.0",
+    "chromadb>=0.5.0",
+    "python-dotenv>=1.0.0",
+    "pydantic-settings>=2.0.0",
+    # Document ingestion
+    "pymupdf>=1.24.0",
+    "Pillow>=10.0.0",
+    "pytesseract>=0.3.10",
+    # Audio / video transcription
+    "faster-whisper>=1.0.0",
+    # YouTube
+    "yt-dlp>=2024.3.0",
+    "youtube-transcript-api>=0.6.2",
+    # PDF report generation
+    "reportlab>=4.1.0",
+]
+
+[project.optional-dependencies]
+cloud = ["langchain-anthropic>=0.3.0"]
+dev   = ["pytest>=8.0", "pytest-cov", "ruff", "mypy"]
+
+[project.scripts]
+localrag = "localrag.ui.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "-v"
+markers   = [
+    "requires_ollama: needs a running Ollama server",
+    "requires_tesseract: needs Tesseract OCR installed",
+    "requires_ffmpeg: needs ffmpeg installed",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
