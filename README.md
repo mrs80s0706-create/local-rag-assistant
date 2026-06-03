@@ -1,54 +1,54 @@
 # 📚 local-rag-assistant
 
-**A privacy-first, fully local document knowledge assistant.**  
-Ask questions about your own documents — PDF, images (OCR), audio/video transcription, YouTube subtitles — without sending a single byte to an external API.
+**プライバシーファーストの完全ローカル文書ナレッジアシスタント。**  
+PDF・画像（OCR）・音声/動画文字起こし・YouTube字幕など、手元の文書に質問できます。外部APIへのデータ送信はゼロです。
 
-> Internal codename: *kamikaze* (retired)
-
----
-
-## ✨ Features
-
-| Feature | Detail |
-|---------|--------|
-| **Fully local inference** | LLM runs via [Ollama](https://ollama.com) on your machine |
-| **Local embeddings** | `nomic-embed-text` through Ollama — zero external embedding API calls |
-| **Multimodal ingestion** | PDF · plain text / Markdown · image OCR (Tesseract) · audio & video (faster-whisper) · YouTube (subtitle API → Whisper fallback) |
-| **ChromaDB vector store** | Persistent local vector DB; no cloud required |
-| **CHAT mode** | Streaming Q&A with source citations |
-| **REPORT mode** | One-shot structured analysis + PDF export |
-| **Multi-session management** | Multiple named chat sessions, persisted as local JSON |
-| **Cloud LLM opt-in** | Anthropic Claude can replace the local LLM if needed (disabled by default) |
+> 内部コードネーム: *kamikaze*（廃止）
 
 ---
 
-## 🏗️ Design philosophy
+## ✨ 特徴
 
-The constraint that drove every architecture decision was: **confidential documents must not leave the machine**.
-
-Working backwards from that constraint:
-
-- **LLM** → Ollama (local inference server)
-- **Embeddings** → `nomic-embed-text` via Ollama (no embedding API calls)
-- **Vector DB** → ChromaDB with a local persistence directory
-- **OCR** → Tesseract (local binary)
-- **Audio transcription** → faster-whisper (local model weights)
-
-The result is a system where the data pipeline from ingestion to answer generation is entirely air-gapped from the internet by default.
+| 機能 | 詳細 |
+|------|------|
+| **完全ローカル推論** | [Ollama](https://ollama.com) でLLMをローカル実行 |
+| **ローカル埋め込み** | `nomic-embed-text` をOllama経由で使用 — 外部埋め込みAPIへの呼び出しゼロ |
+| **マルチモーダル取り込み** | PDF・テキスト/Markdown・画像OCR（Tesseract）・音声/動画（faster-whisper）・YouTube（字幕API → Whisperフォールバック） |
+| **ChromaDB ベクタDB** | ローカル永続化。クラウド不要 |
+| **CHATモード** | 出典付きストリーミングQ&A |
+| **REPORTモード** | 一括分析 + PDF出力 |
+| **複数セッション管理** | 複数の名前付きチャット履歴をローカルJSONで保存 |
+| **クラウドLLM（オプション）** | Anthropic Claudeに切り替え可能（デフォルト: 無効） |
 
 ---
 
-## 🚀 Quick start
+## 🏗️ 設計思想
 
-### 1. Install Ollama and pull models
+すべてのアーキテクチャ決定の制約は「**機密文書を外部に送り出さない**」という一点でした。
+
+この制約から逆算して各コンポーネントを選定：
+
+- **LLM** → Ollama（ローカル推論サーバー）
+- **埋め込み** → `nomic-embed-text` via Ollama（埋め込みAPI呼び出しゼロ）
+- **ベクタDB** → ChromaDB（ローカルディレクトリに永続化）
+- **OCR** → Tesseract（ローカルバイナリ）
+- **音声文字起こし** → faster-whisper（ローカルモデル）
+
+デフォルト設定では、取り込みから回答生成までのデータパイプライン全体がインターネットから完全に切り離されています。
+
+---
+
+## 🚀 クイックスタート
+
+### 1. Ollama のインストールとモデルのダウンロード
 
 ```bash
-# Install Ollama from https://ollama.com
-ollama pull qwen2.5:7b          # default LLM
-ollama pull nomic-embed-text    # embedding model (required)
+# https://ollama.com からインストール
+ollama pull qwen2.5:7b          # 推論LLM（デフォルト）
+ollama pull nomic-embed-text    # 埋め込みモデル（必須）
 ```
 
-### 2. Clone and install
+### 2. クローンとインストール
 
 ```bash
 git clone https://github.com/<your-username>/local-rag-assistant.git
@@ -56,100 +56,98 @@ cd local-rag-assistant
 pip install -e .
 ```
 
-### 3. Configure
+### 3. 設定
 
 ```bash
 cp .env.example .env
-# Edit .env if you want to change the model or data directory
+# モデル名やデータディレクトリを変更したい場合は .env を編集
 ```
 
-### 4. Run
+### 4. 起動
 
 ```bash
 streamlit run src/localrag/ui/app.py
 ```
 
-Open http://localhost:8501, press **Start / Restart system** in the sidebar, then drop a document into the **Document library** section.
+http://localhost:8501 を開き、サイドバーの **Start / Restart system** を押してから、**Document library** に文書を追加してください。
 
 ---
 
-## 🎬 Demo (sample data)
+## 🎬 デモ（サンプルデータ）
 
-`data/samples/` contains two neutral synthetic documents:
+`data/samples/` に2種類の中立な合成データが入っています：
 
-- `meeting_notes_sample.md` — fictional project kickoff minutes
-- `product_manual_sample.pdf` — fictional middleware product manual
+- `meeting_notes_sample.md` — 架空のプロジェクトキックオフ議事録
+- `product_manual_sample.pdf` — 架空のミドルウェア製品マニュアル
 
-To run an end-to-end demo:
+end-to-end デモの手順：
 
-1. Start the system (sidebar → **Start / Restart system**)
-2. Import the samples: sidebar → **Import folder** (point to `data/samples/`)
-3. Ask a question in **Chat** mode, e.g.:  
-   *"What are the action items from the kickoff meeting?"*  
-   *"How do I configure the DataBridge Connector?"*
+1. システムを起動（サイドバー → **Start / Restart system**）
+2. サンプルを取り込む（サイドバー → **Import folder** → `data/samples/` を指定）
+3. **Chat** モードで質問する（例：  
+   *"キックオフミーティングのアクションアイテムは？"*  
+   *"DataBridge Connector の設定方法を教えてください"*）
 
 ---
 
-## 🧪 Running tests
+## 🧪 テスト実行
 
-Tests run **without Ollama, Tesseract, or ffmpeg** installed. LLM and embeddings are replaced by deterministic fakes.
+Ollama・Tesseract・ffmpeg なしで全テストが通ります（LLMと埋め込みは決定論的なFakeを注入）。
 
 ```bash
 pip install -e ".[dev]"
-pytest
+pytest          # 15 tests, all green
 ```
 
-Expected: **15 passed**.
+---
+
+## ⚙️ オプション依存関係
+
+| 機能 | Pythonパッケージ | システム依存 |
+|------|----------------|------------|
+| 画像OCR | `pytesseract` | `tesseract-ocr` バイナリ |
+| 音声/動画 | `faster-whisper` | 不要（初回使用時にモデルをダウンロード） |
+| YouTubeフォールバック | `yt-dlp` | `ffmpeg` バイナリ |
+| クラウドLLM | `langchain-anthropic` | `.env` に `ANTHROPIC_API_KEY` |
+
+システム依存が未導入の場合、そのメディアタイプの取り込みのみが**無効化**されます。他のRAG機能は継続して動作します。
 
 ---
 
-## ⚙️ Optional dependencies
-
-| Capability | Package | System dependency |
-|-----------|---------|-------------------|
-| Image OCR | `pytesseract` | `tesseract-ocr` binary |
-| Audio / video | `faster-whisper` | — (model downloaded on first use) |
-| YouTube audio fallback | `yt-dlp` | `ffmpeg` binary |
-| Cloud LLM | `langchain-anthropic` | `ANTHROPIC_API_KEY` in `.env` |
-
-If a system dependency is missing, that ingestion type is **skipped gracefully**; the rest of the pipeline continues.
-
----
-
-## 📁 Project layout
+## 📁 プロジェクト構成
 
 ```
 local-rag-assistant/
 ├── src/localrag/
-│   ├── config.py              # pydantic-settings typed Settings
-│   ├── ingestion/             # loaders: PDF, OCR, Whisper, YouTube
-│   ├── rag/                   # chunking, embeddings, LLM, ChromaDB, pipeline
-│   ├── session/               # JSON-based chat session persistence
-│   └── ui/                    # Streamlit entry point
+│   ├── config.py              # pydantic-settings 型付きSettings
+│   ├── ingestion/             # ローダー: PDF, OCR, Whisper, YouTube
+│   ├── rag/                   # チャンク, 埋め込み, LLM, ChromaDB, パイプライン
+│   ├── session/               # チャットセッションのJSON永続化
+│   └── ui/                    # Streamlit エントリポイント
 ├── data/
-│   └── samples/               # neutral synthetic demo documents
-├── tests/                     # pytest suite (Fake LLM + Fake Embedder)
+│   └── samples/               # 中立な合成デモ文書
+├── tests/                     # pytestスイート（Fake LLM + Fake Embedder）
 ├── docs/
-│   └── architecture.md        # Mermaid architecture diagram
+│   └── architecture.md        # Mermaid アーキテクチャ図
 ├── .env.example
 └── pyproject.toml
 ```
 
 ---
 
-## 🔒 Privacy guarantee
+## 🔒 プライバシー保証
 
-When `USE_CLOUD_LLM=false` (default):
+`USE_CLOUD_LLM=false`（デフォルト）の場合：
 
-- No document text leaves your machine
-- No embedding vectors are sent externally
-- ChromaDB stores all vectors locally
-- The only outbound traffic is Ollama serving on `localhost`
+- 文書テキストは外部に送信されない
+- 埋め込みベクトルは外部に送信されない
+- ChromaDB はすべてのベクトルをローカルに保存
+- 外部通信は `localhost` のOllamaのみ
 
-When `USE_CLOUD_LLM=true`: query text is sent to the Anthropic API. **Embeddings remain local regardless.**
+`USE_CLOUD_LLM=true` の場合：クエリテキストがAnthropic APIに送信されます。**埋め込みはこの設定に関わらず常にローカルです。**
 
 ---
 
-## 📄 License
+## 📄 ライセンス
 
-MIT — see [LICENSE](LICENSE).
+MIT — [LICENSE](LICENSE) を参照。
