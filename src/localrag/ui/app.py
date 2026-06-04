@@ -129,7 +129,8 @@ section[data-testid="stMain"] > div,
 .stApp [data-testid="stBottom"] > div,
 .stApp [data-testid="stBottom"] > div > div,
 .stApp [data-testid="stBottomBlockContainer"],
-.stApp [data-testid="stBottomBlockContainer"] > div {
+.stApp [data-testid="stBottomBlockContainer"] > div,
+.stApp [data-testid="stBottomBlockContainer"] * {
     background: transparent !important; box-shadow: none !important; backdrop-filter: none !important;
 }
 
@@ -154,6 +155,15 @@ section[data-testid="stMain"] { padding-bottom: 2rem !important; }
 [data-testid="stExpandSidebarButton"] button, button[data-testid="stExpandSidebarButton"] {
     display: flex !important; visibility: visible !important;
 }
+[data-testid="stSidebarCollapseButton"] button,
+[data-testid="stExpandSidebarButton"] button {
+    color: rgba(201,168,76,0.8) !important;
+    transition: color 0.15s ease !important;
+}
+[data-testid="stSidebarCollapseButton"] button:hover,
+[data-testid="stExpandSidebarButton"] button:hover {
+    color: rgba(201,168,76,1) !important;
+}
 
 [data-testid="stSidebar"] {
     background: linear-gradient(180deg, rgba(5,12,21,0.88) 0%, rgba(7,14,24,0.88) 100%) !important;
@@ -162,9 +172,10 @@ section[data-testid="stMain"] { padding-bottom: 2rem !important; }
 [data-testid="stSidebarHeader"] { padding: 0 !important; min-height: 0 !important; }
 [data-testid="stSidebar"] > div:first-child { padding-top: 0 !important; }
 [data-testid="stSidebar"] .block-container { padding: 0.3rem 1rem 2rem !important; }
+[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-top: 0.5rem !important; }
 
 h1,h2,h3,h4 { font-family: var(--serif) !important; color: var(--text) !important; font-weight: 400 !important; }
-p, span, div, label { font-family: var(--sans) !important; }
+p, div, label { font-family: var(--sans) !important; }
 
 .stButton > button {
     background: transparent !important; border: 1px solid var(--gold-border) !important;
@@ -206,6 +217,10 @@ p, span, div, label { font-family: var(--sans) !important; }
 [data-testid="stTextArea"] textarea:focus {
     border-color: var(--gold) !important; box-shadow: 0 0 0 1px rgba(201,168,76,0.35) !important;
 }
+[data-testid="stTextArea"]:focus-within {
+    box-shadow: 0 0 0 1px rgba(201,168,76,0.35) !important;
+}
+[data-testid="stTextArea"] textarea:focus { outline: none !important; }
 [data-testid="stSelectbox"] > div > div {
     background-color: var(--navy-card) !important; border: 1px solid var(--gold-border) !important;
     color: var(--text) !important; border-radius: 2px !important;
@@ -229,11 +244,19 @@ p, span, div, label { font-family: var(--sans) !important; }
     background-color: var(--navy-card) !important; border: 1px solid rgba(201,168,76,0.35) !important;
     border-radius: 3px !important;
 }
-[data-testid="stChatInput"] textarea { background-color: var(--navy-card) !important; color: var(--text) !important; }
+[data-testid="stChatInput"]:focus-within {
+    border-color: var(--gold) !important; box-shadow: 0 0 0 1px rgba(201,168,76,0.35) !important;
+}
+[data-testid="stChatInput"] textarea {
+    background-color: var(--navy-card) !important; color: var(--text) !important; border: none !important;
+}
+[data-testid="stChatInput"] textarea:focus { outline: none !important; }
+[data-testid="stChatInput"] textarea::placeholder { color: var(--text-sub) !important; }
 [data-testid="stChatInput"] button:not(:disabled) { background-color: var(--gold) !important; color: #09131E !important; }
 
 [data-testid="stBottom"] { position: sticky !important; bottom: 0 !important; background: transparent !important; z-index: 100 !important; }
 [data-testid="stBottomBlockContainer"] { max-width: 880px !important; padding: 0 2rem !important; background: transparent !important; }
+[data-testid="stBottom"] { margin-bottom: 1rem !important; }
 
 [data-testid="stSidebar"] [data-testid="stExpander"] {
     background-color: rgba(14,28,47,0.4) !important;
@@ -258,9 +281,6 @@ p, span, div, label { font-family: var(--sans) !important; }
 .chat-search-wrap [data-testid="stTextInput"] input { font-size: 0.82rem !important; }
 .search-match-label { color: rgba(201,168,76,0.75); font-size: 0.72rem; letter-spacing: 0.04em; }
 
-[data-testid="stSidebarCollapseButton"] button::after { content: '‹'; font-size: 1.1rem; color: rgba(201,168,76,0.75); }
-[data-testid="stExpandSidebarButton"] button::after,
-button[data-testid="stExpandSidebarButton"]::after { content: '›'; font-size: 1.1rem; color: rgba(201,168,76,0.75); }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--navy); }
@@ -781,6 +801,21 @@ def _get_file_icon(f: dict) -> str:
 
 def render_sidebar() -> None:
     with st.sidebar:
+        st.markdown(
+            '<div style="padding:0 0 0.6rem 0;margin-bottom:0.4rem;'
+            'border-bottom:1px solid rgba(201,168,76,0.3);">'
+            '<div style="display:flex;align-items:center;gap:6px;margin-bottom:0.5rem;">'
+            '<div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.5));"></div>'
+            '<span style="color:rgba(201,168,76,0.6);font-size:0.5rem;">◆</span>'
+            '<div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(201,168,76,0.5),transparent);"></div>'
+            '</div>'
+            '<div style="font-family:\'Noto Serif JP\',Georgia,serif;font-size:1.05rem;'
+            'font-weight:300;letter-spacing:0.12em;color:#EDE8DF;">Local RAG Assistant</div>'
+            '<div style="margin-top:0.2rem;font-size:0.52rem;letter-spacing:0.32em;'
+            'color:rgba(201,168,76,0.55);">LOCAL · RAG · ASSISTANT</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         is_proc = st.session_state.get("is_processing", False)
 
         if st.session_state.get("action_error"):
@@ -1274,47 +1309,6 @@ def main() -> None:
         )
 
     render_sidebar()
-
-    # ── Title banner ───────────────────────────────────────────────────────
-    title_b64 = _title_image_b64()
-    _title_inner = (
-        f'<div style="display:flex;justify-content:center;align-items:center;height:120px;">'
-        f'<img src="data:image/png;base64,{title_b64}" style="max-width:100%;max-height:120px;object-fit:contain;" />'
-        f'</div>'
-        if title_b64 else
-        '<div style="height:120px;display:flex;flex-direction:column;justify-content:center;">'
-        '<div style="font-family:\'Noto Serif JP\',Georgia,serif;font-size:1.85rem;font-weight:300;'
-        'letter-spacing:0.18em;color:#EDE8DF;">Local RAG Assistant</div>'
-        '<div style="margin-top:0.35rem;font-size:0.6rem;letter-spacing:0.38em;color:rgba(201,168,76,0.55);">'
-        'LOCAL · RAG · ASSISTANT</div>'
-        '</div>'
-    )
-    st.markdown(
-        '<div style="position:relative;padding:1.5rem 1.8rem;margin-top:-1.5rem;margin-bottom:1.2rem;'
-        'background:linear-gradient(135deg,rgba(201,168,76,0.06) 0%,rgba(201,168,76,0.02) 40%,transparent 100%);'
-        'border:1px solid rgba(201,168,76,0.35);border-radius:3px;">'
-        '<div style="position:absolute;top:-1px;left:-1px;width:14px;height:14px;'
-        'border-top:2px solid rgba(201,168,76,0.4);border-left:2px solid rgba(201,168,76,0.4);"></div>'
-        '<div style="position:absolute;top:-1px;right:-1px;width:14px;height:14px;'
-        'border-top:2px solid rgba(201,168,76,0.4);border-right:2px solid rgba(201,168,76,0.4);"></div>'
-        '<div style="position:absolute;bottom:-1px;left:-1px;width:14px;height:14px;'
-        'border-bottom:2px solid rgba(201,168,76,0.4);border-left:2px solid rgba(201,168,76,0.4);"></div>'
-        '<div style="position:absolute;bottom:-1px;right:-1px;width:14px;height:14px;'
-        'border-bottom:2px solid rgba(201,168,76,0.4);border-right:2px solid rgba(201,168,76,0.4);"></div>'
-        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:0.1rem;">'
-        '<div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(201,168,76,0.6),transparent);"></div>'
-        '<span style="color:rgba(201,168,76,0.55);font-size:0.5rem;letter-spacing:0.5em;">✦ &nbsp; ✦ &nbsp; ✦</span>'
-        '<div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.6));"></div>'
-        '</div>'
-        + _title_inner +
-        '<div style="display:flex;align-items:center;gap:10px;margin-top:0.1rem;">'
-        '<div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(201,168,76,0.4),transparent);"></div>'
-        '<span style="color:rgba(201,168,76,0.4);font-size:0.5rem;letter-spacing:0.3em;">— &nbsp; ◆ &nbsp; —</span>'
-        '<div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.4));"></div>'
-        '</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
 
     # ── Mode toggle ────────────────────────────────────────────────────────
     is_proc = st.session_state.get("is_processing", False)
