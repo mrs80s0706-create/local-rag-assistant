@@ -201,6 +201,9 @@ p, div, label { font-family: var(--sans) !important; }
     background: linear-gradient(135deg, #8A6820 0%, var(--gold) 50%, var(--gold-light) 100%) !important;
     border: 1px solid var(--gold-light) !important; color: #050C15 !important; font-weight: 700 !important;
 }
+[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] .stButton > button {
+    overflow: hidden !important; text-overflow: ellipsis !important;
+}
 .stFormSubmitButton > button {
     background: linear-gradient(135deg, #8A6820, var(--gold), var(--gold-light)) !important;
     border: 1px solid var(--gold-light) !important; color: #09131E !important;
@@ -238,6 +241,12 @@ p, div, label { font-family: var(--sans) !important; }
     background: linear-gradient(135deg, var(--navy-card), #101E33) !important;
     border: 1px solid var(--gold-border) !important; border-left: 2px solid rgba(201,168,76,0.4) !important;
     border-radius: 3px !important; margin-bottom: 0.65rem !important;
+}
+.stChatMessage p,
+.stChatMessage li,
+.stChatMessage span,
+.stChatMessage div[data-testid="stMarkdownContainer"] {
+    color: var(--text) !important;
 }
 [data-testid="stChatInput"],
 [data-testid="stChatInputContainer"] > div {
@@ -281,6 +290,45 @@ p, div, label { font-family: var(--sans) !important; }
 .chat-search-wrap [data-testid="stTextInput"] input { font-size: 0.82rem !important; }
 .search-match-label { color: rgba(201,168,76,0.75); font-size: 0.72rem; letter-spacing: 0.04em; }
 
+/* ── Popover (セッション ︙ メニュー) ────────────────────────────────── */
+/* ① ︙ トリガーボタン */
+[data-testid="stPopover"] button {
+    background: transparent !important; border: none !important;
+    color: var(--gold) !important; padding: 0.15rem 0.4rem !important; font-size: 0.9rem !important;
+}
+[data-testid="stPopover"] button:hover {
+    background: var(--gold-dim) !important; color: var(--gold-light) !important;
+}
+/* ① 自動付与の開閉矢印（SVG）を非表示 */
+[data-testid="stPopover"] button svg,
+[data-testid="stPopover"] button [data-testid="stPopoverTriggerIcon"] { display: none !important; }
+/* ② ポップオーバー本体（testid と baseweb 両方試す）*/
+[data-testid="stPopoverBody"],
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] > div > div {
+    background-color: var(--navy-light) !important;
+    border: 1px solid var(--gold-border2) !important; border-radius: 4px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.65) !important; padding: 0.25rem !important;
+}
+/* ③ ポップオーバー内ボタン共通 */
+[data-testid="stPopoverBody"] .stButton > button,
+div[data-baseweb="popover"] .stButton > button {
+    background: transparent !important; border: none !important;
+    color: var(--text) !important; font-size: 0.8rem !important;
+    text-align: left !important; justify-content: flex-start !important;
+    width: 100% !important; padding: 0.35rem 0.6rem !important; border-radius: 3px !important;
+}
+[data-testid="stPopoverBody"] .stButton > button:hover,
+div[data-baseweb="popover"] .stButton > button:hover {
+    background: rgba(201,168,76,0.12) !important; color: var(--text) !important;
+}
+/* ④ 削除ボタン — .danger-btn クラスで確実にターゲット */
+.danger-btn .stButton > button {
+    color: rgba(220,80,80,0.9) !important; background: transparent !important; border: none !important;
+}
+.danger-btn .stButton > button:hover {
+    background: rgba(200,60,60,0.15) !important; color: rgba(240,100,100,1) !important;
+}
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--navy); }
@@ -724,28 +772,30 @@ def _render_session_item(s: dict) -> None:
         return
 
     n     = s["name"]
-    label = ("▶ " if is_current else "") + (n[:12] + "…" if len(n) > 12 else n)
-    col_n, col_e, col_d = st.columns([6, 1, 1])
+    label = ("▶ " if is_current else "") + (n[:20] + "…" if len(n) > 20 else n)
+    col_n, col_m = st.columns([6, 1])
     with col_n:
         if st.button(label, key=f"s_{s['id']}", use_container_width=True, disabled=is_proc):
             if not is_current:
                 _save_current_session()
                 _switch_session(s["id"])
                 st.rerun()
-    with col_e:
-        if st.button("✎", key=f"re_{s['id']}", disabled=is_proc):
-            st.session_state["session_rename_id"] = s["id"]
-            st.rerun()
-    with col_d:
-        if st.button("×", key=f"d_{s['id']}", disabled=is_proc):
-            _delete_session(s["id"])
-            if is_current:
-                remaining = _load_all_sessions()
-                if remaining:
-                    _switch_session(remaining[0]["id"])
-                else:
-                    _new_session()
-            st.rerun()
+    with col_m:
+        with st.popover("︙", use_container_width=True, disabled=is_proc):
+            if st.button("名前を変更", key=f"re_{s['id']}", use_container_width=True):
+                st.session_state["session_rename_id"] = s["id"]
+                st.rerun()
+            st.markdown('<div class="danger-btn">', unsafe_allow_html=True)
+            if st.button("削除", key=f"d_{s['id']}", use_container_width=True):
+                _delete_session(s["id"])
+                if is_current:
+                    remaining = _load_all_sessions()
+                    if remaining:
+                        _switch_session(remaining[0]["id"])
+                    else:
+                        _new_session()
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
 
 def _render_session_manager() -> None:
